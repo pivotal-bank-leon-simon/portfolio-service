@@ -22,10 +22,10 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EnableCircuitBreaker
 public class PortfolioApplication {
 	
-	@Bean
-	public Sampler<?> defaultSampler() {
+	/*@Bean
+	public Sampler defaultSampler() {
 		return new AlwaysSampler();
-	}
+	}*/
 	
 	public static void main(String[] args) {
 		SpringApplication.run(PortfolioApplication.class, args);
