@@ -21,8 +21,8 @@ import org.springframework.web.util.UriComponentsBuilder;
  * 
  * Provides the following endpoints:
  * <p><ul>
- * <li>GET <code>/portfolio/{id}</code> retrieves the portfolio with given account id.
- * <li>POST <code>/portfolio{id}</code> adds an order to the portfolio with the given account id.
+ * <li>GET <code>/portfolio/{id}</code> retrieves the portfolio with given user id.
+ * <li>POST <code>/portfolio{id}</code> adds an order to the portfolio with the given user id.
  * </ul><p>
  * 
  * @author David Ferreira Pinto
@@ -41,13 +41,13 @@ public class PortfolioController {
 
 	/**
 	 * Retrieves the portfolio for the given account.
-	 * @param accountId the account to retrieve the portfolio for.
+	 * @param userId the user to retrieve the portfolio for.
 	 * @return The portfolio with HTTP OK.
 	 */
 	@RequestMapping(value = "/portfolio/{id}", method = RequestMethod.GET)
-	public ResponseEntity<Portfolio> getPortfolio(@PathVariable("id") final String accountId) {
-		logger.debug("PortfolioController: Retrieving portfolio with user id:" + accountId);
-		Portfolio folio = service.getPortfolio(accountId);
+	public ResponseEntity<Portfolio> getPortfolio(@PathVariable("id") final String userId) {
+		logger.debug("PortfolioController: Retrieving portfolio with user id:" + userId);
+		Portfolio folio = service.getPortfolio(userId);
 		logger.debug("PortfolioController: Retrieved portfolio:" + folio);
 		return new ResponseEntity<Portfolio>(folio, getNoCacheHeaders(), HttpStatus.OK);
 	}
@@ -58,23 +58,23 @@ public class PortfolioController {
 		return responseHeaders;
 	}
 	/**
-	 * Adds an order to the portfolio of the given account.
+	 * Adds an order to the portfolio of the given user.
 	 * 
-	 * @param accountId the account to add the order to.
+	 * @param userId the user to add the order to.
 	 * @param order The order to add.
 	 * @param builder
 	 * @return The order with HTTP CREATED or BAD REQUEST if it couldn't save.
 	 */
 	@RequestMapping(value = "/portfolio/{id}", method = RequestMethod.POST)
-	public ResponseEntity<Order> addOrder(@PathVariable("id") final String accountId, @RequestBody final Order order, UriComponentsBuilder builder) {
+	public ResponseEntity<Order> addOrder(@PathVariable("id") final String userId, @RequestBody final Order order, UriComponentsBuilder builder) {
 		logger.debug("Adding Order: " + order);
 		
-		//TODO: can do a test to ensure accountId == order.getAccountId();
+		//TODO: can do a test to ensure userId == order.getUserId();
 		
 		Order savedOrder = service.addOrder(order);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setLocation(builder.path("/portfolio/{id}")
-				.buildAndExpand(accountId).toUri());
+				.buildAndExpand(userId).toUri());
 		logger.debug("Order added: " + savedOrder);
 		if (savedOrder != null && savedOrder.getOrderId() != null) {
 			return new ResponseEntity<Order>(savedOrder, responseHeaders, HttpStatus.CREATED);

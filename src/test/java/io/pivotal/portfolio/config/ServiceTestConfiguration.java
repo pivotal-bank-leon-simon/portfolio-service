@@ -13,10 +13,12 @@ import io.pivotal.portfolio.domain.Order;
 import io.pivotal.portfolio.domain.OrderType;
 import io.pivotal.portfolio.domain.Portfolio;
 import io.pivotal.portfolio.domain.Quote;
+import io.pivotal.portfolio.domain.Transaction;
 
 public class ServiceTestConfiguration {
 	
-	public static final String ACCOUNT_ID = "user";
+	public static final Integer ACCOUNT_ID = 500;
+	public static final String USER_ID = "davpin";
 	public static final String SYMBOL = "EMC";
 	public static final Integer QUANTITY = 1000;
 	public static final BigDecimal PRICE = new BigDecimal(10.00);
@@ -41,6 +43,7 @@ public class ServiceTestConfiguration {
 	
 	public static Order order() {
 		Order order1 = new Order();
+		order1.setUserId(USER_ID);
 		order1.setAccountId(ACCOUNT_ID);
 		order1.setCompletionDate(COMPLETION_DATE);
 		order1.setOrderFee(FEE);
@@ -55,6 +58,7 @@ public class ServiceTestConfiguration {
 		Order order1 = new Order();
 		order1.setOrderId(1);
 		order1.setAccountId(ACCOUNT_ID);
+		order1.setUserId(USER_ID);
 		order1.setCompletionDate(COMPLETION_DATE);
 		order1.setOrderFee(FEE);
 		order1.setOrderType(OrderType.BUY);
@@ -66,6 +70,7 @@ public class ServiceTestConfiguration {
 	public static Order sellOrder() {
 		Order order1 = new Order();
 		order1.setOrderId(1);
+		order1.setUserId(USER_ID);
 		order1.setAccountId(ACCOUNT_ID);
 		order1.setCompletionDate(COMPLETION_DATE);
 		order1.setOrderFee(FEE);
@@ -110,10 +115,19 @@ public class ServiceTestConfiguration {
 		holding.addOrder(order2());
 		holding.setSymbol(SYMBOL);
 		Portfolio folio = new Portfolio();
-		folio.setAccountId(ACCOUNT_ID);
+		folio.setUserName(USER_ID);
 		folio.addHolding(holding);
 		folio.refreshTotalValue();
 		return folio;
+	}
+	
+	public static Transaction transaction() {
+		Transaction tx = new Transaction();
+		tx.setAccountId(ACCOUNT_ID);
+		tx.setAmount(PRICE);
+		tx.setCurrency("USD");
+		
+		return tx;
 	}
 
 }

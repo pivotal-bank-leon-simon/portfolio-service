@@ -14,19 +14,19 @@ import java.util.Map;
  */
 public class Portfolio {
 
-	private String accountId;
+	private String userName;
 	private String name;
 	private BigDecimal currentTotalValue = BigDecimal.ZERO;
 	private BigDecimal purchaseValue = BigDecimal.ZERO;
 	private BigDecimal sellValue = BigDecimal.ZERO;
 	private Map<String, Holding> holdings = new HashMap<>();
 
-	public String getAccountId() {
-		return accountId;
+	public String getUserName() {
+		return userName;
 	}
 
-	public void setAccountId(String accountId) {
-		this.accountId = accountId;
+	public void setUserName(String accountId) {
+		this.userName = accountId;
 	}
 
 	public String getName() {
@@ -86,7 +86,7 @@ public class Portfolio {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("Portfolio [accountId=").append(accountId).append(", name=").append(name).append(", currentTotalValue=").append(currentTotalValue).append(", purchaseValue=")
+		builder.append("Portfolio [accountId=").append(userName).append(", name=").append(name).append(", currentTotalValue=").append(currentTotalValue).append(", purchaseValue=")
 				.append(purchaseValue).append(", sellValue=").append(sellValue).append(", holdings=").append(holdings).append("]");
 		return builder.toString();
 	}
@@ -103,7 +103,7 @@ public class Portfolio {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((accountId == null) ? 0 : accountId.hashCode());
+		result = prime * result + ((userName == null) ? 0 : userName.hashCode());
 		result = prime * result + ((currentTotalValue == null) ? 0 : currentTotalValue.hashCode());
 		result = prime * result + ((holdings == null) ? 0 : holdings.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
@@ -121,10 +121,10 @@ public class Portfolio {
 		if (getClass() != obj.getClass())
 			return false;
 		Portfolio other = (Portfolio) obj;
-		if (accountId == null) {
-			if (other.accountId != null)
+		if (userName == null) {
+			if (other.userName != null)
 				return false;
-		} else if (!accountId.equals(other.accountId))
+		} else if (!userName.equals(other.userName))
 			return false;
 		if (currentTotalValue == null) {
 			if (other.currentTotalValue != null)
