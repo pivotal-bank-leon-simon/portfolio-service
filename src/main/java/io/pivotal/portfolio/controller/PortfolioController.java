@@ -62,25 +62,22 @@ public class PortfolioController {
 	 * 
 	 * @param userId the user to add the order to.
 	 * @param order The order to add.
-	 * @param builder
 	 * @return The order with HTTP CREATED or BAD REQUEST if it couldn't save.
 	 */
-	@RequestMapping(value = "/portfolio/{id}", method = RequestMethod.POST)
-	public ResponseEntity<Order> addOrder(@PathVariable("id") final String userId, @RequestBody final Order order, UriComponentsBuilder builder) {
+	@RequestMapping(value = "/portfolio", method = RequestMethod.POST)
+	public ResponseEntity<Order> addOrder(@RequestBody final Order order) {
 		logger.debug("Adding Order: " + order);
 		
 		//TODO: can do a test to ensure userId == order.getUserId();
 		
 		Order savedOrder = service.addOrder(order);
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.setLocation(builder.path("/portfolio/{id}")
-				.buildAndExpand(userId).toUri());
+
 		logger.debug("Order added: " + savedOrder);
 		if (savedOrder != null && savedOrder.getOrderId() != null) {
-			return new ResponseEntity<Order>(savedOrder, responseHeaders, HttpStatus.CREATED);
+			return new ResponseEntity<Order>(savedOrder, getNoCacheHeaders(), HttpStatus.CREATED);
 		} else {
 			logger.warn("Order not saved: " + order);
-			return new ResponseEntity<Order>(savedOrder, responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<Order>(savedOrder, getNoCacheHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 }

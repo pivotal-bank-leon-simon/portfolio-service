@@ -68,19 +68,19 @@ public class PortfolioService {
 	/**
 	 * Retrieves the portfolio for the given accountId.
 	 * 
-	 * @param accountId
+	 * @param userId
 	 *            The account id to retrieve for.
 	 * @return The portfolio.
 	 */
-	public Portfolio getPortfolio(String accountId) {
+	public Portfolio getPortfolio(String userId) {
 		/*
 		 * Retrieve all orders for accounts id and build portfolio. - for each
 		 * order create holding. - for each holding find current price.
 		 */
-		logger.debug("Getting portfolio for accountId: " + accountId);
-		List<Order> orders = repository.findByAccountId(accountId);
+		logger.debug("Getting portfolio for accountId: " + userId);
+		List<Order> orders = repository.findByUserId(userId);
 		Portfolio folio = new Portfolio();
-		folio.setUserName(accountId);
+		folio.setUserName(userId);
 		return createPortfolio(folio, orders);
 	}
 

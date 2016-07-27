@@ -51,7 +51,7 @@ public class PortfolioServiceTest {
 	@Test
 	public void doGetPortfolio() {
  
-		when(repo.findByAccountId(ServiceTestConfiguration.USER_ID)).thenReturn(ServiceTestConfiguration.orders());
+		when(repo.findByUserId(ServiceTestConfiguration.USER_ID)).thenReturn(ServiceTestConfiguration.orders());
 		//when(quoteService.getUri()).thenReturn(uri);
 		when(quoteService.getQuote(ServiceTestConfiguration.quote().getSymbol())).thenReturn(ServiceTestConfiguration.quote());
 		//when(restTemplate.getForObject("http://" + service.quotesService +"/quote/{symbol}", Quote.class, ServiceTestConfiguration.quote().getSymbol())).thenReturn(ServiceTestConfiguration.quote());

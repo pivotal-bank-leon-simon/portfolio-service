@@ -72,7 +72,7 @@ public class PortfolioControllerTest {
 		.thenReturn(ServiceTestConfiguration.order2());
 
 mockMvc.perform(
-		post("/portfolio/" + ServiceTestConfiguration.USER_ID)
+		post("/portfolio")
 		.contentType(MediaType.APPLICATION_JSON)
 				.content(
 						convertObjectToJson(ServiceTestConfiguration.order())))
