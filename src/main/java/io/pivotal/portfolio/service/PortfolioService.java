@@ -102,6 +102,7 @@ public class PortfolioService {
 			if (holding == null) {
 				holding = new Holding();
 				holding.setSymbol(order.getSymbol());
+				holding.setCurrency(order.getCurrency());
 				portfolio.addHolding(holding);
 				symbols.add(order.getSymbol());
 			}
