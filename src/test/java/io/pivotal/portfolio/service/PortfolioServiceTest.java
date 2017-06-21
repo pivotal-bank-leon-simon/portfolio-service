@@ -12,6 +12,7 @@ import io.pivotal.portfolio.config.ServiceTestConfiguration;
 import io.pivotal.portfolio.domain.Order;
 import io.pivotal.portfolio.domain.Portfolio;
 import io.pivotal.portfolio.domain.Quote;
+import io.pivotal.portfolio.domain.Transaction;
 import io.pivotal.portfolio.repository.OrderRepository;
 
 import org.junit.Before;
@@ -50,22 +51,22 @@ public class PortfolioServiceTest {
 	@Test
 	public void doGetPortfolio() {
  
-		when(repo.findByAccountId(ServiceTestConfiguration.ACCOUNT_ID)).thenReturn(ServiceTestConfiguration.orders());
+		when(repo.findByUserId(ServiceTestConfiguration.USER_ID)).thenReturn(ServiceTestConfiguration.orders());
 		//when(quoteService.getUri()).thenReturn(uri);
 		when(quoteService.getQuote(ServiceTestConfiguration.quote().getSymbol())).thenReturn(ServiceTestConfiguration.quote());
 		//when(restTemplate.getForObject("http://" + service.quotesService +"/quote/{symbol}", Quote.class, ServiceTestConfiguration.quote().getSymbol())).thenReturn(ServiceTestConfiguration.quote());
-		Portfolio folio = service.getPortfolio(ServiceTestConfiguration.ACCOUNT_ID);
+		Portfolio folio = service.getPortfolio(ServiceTestConfiguration.USER_ID);
 	}
 	@Test
 	public void doSaveOrder() {
 		Order returnOrder = ServiceTestConfiguration.order();
 		returnOrder.setOrderId(1);
 		double amount = ServiceTestConfiguration.order().getQuantity()*ServiceTestConfiguration.order().getPrice().doubleValue()+ServiceTestConfiguration.order().getOrderFee().doubleValue();
-		ResponseEntity<Double> response = new ResponseEntity<Double>(100d, HttpStatus.OK);
+		ResponseEntity<String> response = new ResponseEntity<String>("SUCCESS", HttpStatus.OK);
 		
 		
 		//when(accountService.getUri()).thenReturn(uri);
-		when(restTemplate.getForEntity("http://" + service.accountsService +"/accounts/{userid}/decreaseBalance/{amount}", Double.class, ServiceTestConfiguration.order().getAccountId(), amount )).thenReturn(response);
+		when(restTemplate.postForEntity(eq("http://" + service.accountsService +"/accounts/transaction"), any(), eq(String.class))).thenReturn(response);
 		when(repo.save(ServiceTestConfiguration.order())).thenReturn(returnOrder);
 		Order order = service.addOrder(ServiceTestConfiguration.order());
 		assertEquals(order, returnOrder);
@@ -76,11 +77,11 @@ public class PortfolioServiceTest {
 		Order returnOrder = ServiceTestConfiguration.order();
 		returnOrder.setOrderId(1);
 		double amount = returnOrder.getQuantity()*returnOrder.getPrice().doubleValue()+returnOrder.getOrderFee().doubleValue();
-		ResponseEntity<Double> response = new ResponseEntity<Double>(100d, HttpStatus.OK);
+		ResponseEntity<String> response = new ResponseEntity<String>("SUCCESS", HttpStatus.OK);
 		
 		
 		//when(accountService.getUri()).thenReturn(uri);
-		when(restTemplate.getForEntity(any(), eq(Double.class), any(), any())).thenReturn(response);
+		when(restTemplate.postForEntity(eq("http://" + service.accountsService +"/accounts/transaction"), any(), eq(String.class))).thenReturn(response);
 		when(repo.save(isA(Order.class))).thenReturn(returnOrder);
 		Order requestOrder = ServiceTestConfiguration.order();
 		requestOrder.setOrderFee(null);
@@ -92,11 +93,11 @@ public class PortfolioServiceTest {
 		Order returnOrder = ServiceTestConfiguration.sellOrder();
 		returnOrder.setOrderId(1);
 		double amount = ServiceTestConfiguration.sellOrder().getQuantity()*ServiceTestConfiguration.sellOrder().getPrice().doubleValue()-ServiceTestConfiguration.sellOrder().getOrderFee().doubleValue();
-		ResponseEntity<Double> response = new ResponseEntity<Double>(100d, HttpStatus.OK);
+		ResponseEntity<String> response = new ResponseEntity<String>("SUCCESS", HttpStatus.OK);
 		
 		
 		//when(accountService.getUri()).thenReturn(uri);
-		when(restTemplate.getForEntity("http://" + service.accountsService +"/accounts/{userid}/increaseBalance/{amount}", Double.class, ServiceTestConfiguration.sellOrder().getAccountId(), amount )).thenReturn(response);
+		when(restTemplate.postForEntity(eq("http://" + service.accountsService +"/accounts/transaction"), any(), eq(String.class ))).thenReturn(response);
 		when(repo.save(ServiceTestConfiguration.sellOrder())).thenReturn(returnOrder);
 		Order order = service.addOrder(ServiceTestConfiguration.sellOrder());
 		assertEquals(order, returnOrder);

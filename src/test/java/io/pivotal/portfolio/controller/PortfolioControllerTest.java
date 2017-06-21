@@ -48,11 +48,11 @@ public class PortfolioControllerTest {
 
 	@Test
 	public void getPortfolio() throws Exception {
-		when(service.getPortfolio(ServiceTestConfiguration.ACCOUNT_ID))
+		when(service.getPortfolio(ServiceTestConfiguration.USER_ID))
 				.thenReturn(ServiceTestConfiguration.portfolio());
 
 		mockMvc.perform(
-				get("/portfolio/" + ServiceTestConfiguration.ACCOUNT_ID)
+				get("/portfolio/" + ServiceTestConfiguration.USER_ID)
 						.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andDo(print())
@@ -60,8 +60,8 @@ public class PortfolioControllerTest {
 						content().contentTypeCompatibleWith(
 								MediaType.APPLICATION_JSON))
 				.andExpect(
-						jsonPath("$.accountId").value(
-								ServiceTestConfiguration.ACCOUNT_ID))
+						jsonPath("$.userName").value(
+								ServiceTestConfiguration.USER_ID))
 				.andExpect(jsonPath("$.holdings.*").value(hasSize(1)))
 				.andDo(print());
 	}
@@ -72,7 +72,7 @@ public class PortfolioControllerTest {
 		.thenReturn(ServiceTestConfiguration.order2());
 
 mockMvc.perform(
-		post("/portfolio/" + ServiceTestConfiguration.ACCOUNT_ID)
+		post("/portfolio")
 		.contentType(MediaType.APPLICATION_JSON)
 				.content(
 						convertObjectToJson(ServiceTestConfiguration.order())))

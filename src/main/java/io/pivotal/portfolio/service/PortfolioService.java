@@ -1,6 +1,9 @@
 package io.pivotal.portfolio.service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,6 +27,8 @@ import io.pivotal.portfolio.domain.Order;
 import io.pivotal.portfolio.domain.OrderType;
 import io.pivotal.portfolio.domain.Portfolio;
 import io.pivotal.portfolio.domain.Quote;
+import io.pivotal.portfolio.domain.Transaction;
+import io.pivotal.portfolio.domain.TransactionType;
 import io.pivotal.portfolio.repository.OrderRepository;
 
 /**
@@ -63,19 +68,19 @@ public class PortfolioService {
 	/**
 	 * Retrieves the portfolio for the given accountId.
 	 * 
-	 * @param accountId
+	 * @param userId
 	 *            The account id to retrieve for.
 	 * @return The portfolio.
 	 */
-	public Portfolio getPortfolio(String accountId) {
+	public Portfolio getPortfolio(String userId) {
 		/*
 		 * Retrieve all orders for accounts id and build portfolio. - for each
 		 * order create holding. - for each holding find current price.
 		 */
-		logger.debug("Getting portfolio for accountId: " + accountId);
-		List<Order> orders = repository.findByAccountId(accountId);
+		logger.debug("Getting portfolio for accountId: " + userId);
+		List<Order> orders = repository.findByUserId(userId);
 		Portfolio folio = new Portfolio();
-		folio.setAccountId(accountId);
+		folio.setUserName(userId);
 		return createPortfolio(folio, orders);
 	}
 
@@ -97,13 +102,17 @@ public class PortfolioService {
 			if (holding == null) {
 				holding = new Holding();
 				holding.setSymbol(order.getSymbol());
+				holding.setCurrency(order.getCurrency());
 				portfolio.addHolding(holding);
 				symbols.add(order.getSymbol());
 			}
 			holding.addOrder(order);
 		}
+		List<Quote> quotes = new ArrayList<>();
 		
-		List<Quote> quotes = quoteService.getMultipleQuotes(symbols);
+		if (symbols.size() > 0) {
+			quotes = quoteService.getMultipleQuotes(symbols);
+		}
 
 		for (Quote quote : quotes) {
 			portfolio.getHolding(quote.getSymbol()).setCurrentValue(quote.getLastPrice());
@@ -143,43 +152,50 @@ public class PortfolioService {
 			order.setOrderFee(Order.DEFAULT_ORDER_FEE);
 			logger.debug("Adding Fee to order: " + order);
 		}
-		if (order.getOrderType() == OrderType.BUY) {
+		Transaction transaction = new Transaction();
+		
+		if (order.getOrderType().equals(OrderType.BUY)) {
 			double amount = order.getQuantity()
 					* order.getPrice().doubleValue()
 					+ order.getOrderFee().doubleValue();
-			ResponseEntity<Double> result = restTemplate.getForEntity("http://"
-					+ accountsService
-					+ "/accounts/{userid}/decreaseBalance/{amount}",
-					Double.class, order.getAccountId(), amount);
-			if (result.getStatusCode() == HttpStatus.OK) {
-				logger.info(String
-						.format("Account funds updated successfully for account: %s and new funds are: %s",
-								order.getAccountId(), result.getBody()));
-				return repository.save(order);
-			} else {
-				// TODO: throw exception - not enough funds!
-				// SK - Whats the expected behaviour?
-				logger.warn("PortfolioService:addOrder - decresing balance HTTP not ok: ");
-				return null;
-			}
-		} else {
+			
+			transaction.setAccountId(order.getAccountId());
+			transaction.setAmount(BigDecimal.valueOf(amount));
+			transaction.setCurrency(order.getCurrency());
+			transaction.setDate(order.getCompletionDate());
+			transaction.setDescription(order.toString());
+			transaction.setType(TransactionType.DEBIT);
+			
+		} else if (order.getOrderType().equals(OrderType.SELL)){
 			double amount = order.getQuantity()
 					* order.getPrice().doubleValue()
 					- order.getOrderFee().doubleValue();
-			ResponseEntity<Double> result = restTemplate.getForEntity("http://"
-					+ accountsService
-					+ "/accounts/{userid}/increaseBalance/{amount}",
-					Double.class, order.getAccountId(), amount);
-			if (result.getStatusCode() == HttpStatus.OK) {
-				logger.info(String
-						.format("Account funds updated successfully for account: %s and new funds are: %s",
-								order.getAccountId(), result.getBody()));
-				return repository.save(order);
-			} else {
-				// TODO: throw exception - negative value???
-				logger.warn("PortfolioService:addOrder - increasing balance HTTP not ok: ");
-				return null;
-			}
+			
+			transaction.setAccountId(order.getAccountId());
+			transaction.setAmount(BigDecimal.valueOf(amount));
+			transaction.setCurrency(order.getCurrency());
+			transaction.setDate(order.getCompletionDate());
+			transaction.setDescription(order.toString());
+			transaction.setType(TransactionType.CREDIT);
+			
+		}
+		
+		ResponseEntity<String> result = restTemplate.postForEntity("http://"
+				+ accountsService
+				+ "/accounts/transaction",
+				transaction, String.class);
+		
+		if (result.getStatusCode() == HttpStatus.OK) {
+			logger.info(String
+					.format("Account funds updated successfully for account: %s and new funds are: %s",
+							order.getAccountId(), result.getBody()));
+			return repository.save(order);
+			
+		} else {
+			// TODO: throw exception - not enough funds!
+			// SK - Whats the expected behaviour?
+			logger.warn("PortfolioService:addOrder - decresing balance HTTP not ok: ");
+			return null;
 		}
 
 	}
