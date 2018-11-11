@@ -40,7 +40,10 @@ public class PortfolioServiceTest {
 	
 	@Mock
 	QuoteRemoteCallService quoteService;
-	
+
+	@Mock
+	PortfolioRepositoryService portfolioRepositoryService;
+
 	@Before
 	public void setup() {
 		MockitoAnnotations.initMocks(this);
