@@ -28,7 +28,7 @@ public class Order {
 	public static BigDecimal DEFAULT_ORDER_FEE = new BigDecimal(10.50);
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.TABLE)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "orderid")
 	private Integer orderId;
 	
