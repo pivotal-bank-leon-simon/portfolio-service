@@ -57,7 +57,7 @@ public class PortfolioServiceTest {
 		when(repo.findByUserId(ServiceTestConfiguration.USER_ID)).thenReturn(ServiceTestConfiguration.orders());
 		//when(quoteService.getUri()).thenReturn(uri);
 		when(quoteService.getQuote(ServiceTestConfiguration.quote().getSymbol())).thenReturn(ServiceTestConfiguration.quote());
-		//when(restTemplate.getForObject("http://" + service.quotesService +"/quote/{symbol}", Quote.class, ServiceTestConfiguration.quote().getSymbol())).thenReturn(ServiceTestConfiguration.quote());
+		//when(restTemplate.getForObject("//" + service.quotesService +"/quote/{symbol}", Quote.class, ServiceTestConfiguration.quote().getSymbol())).thenReturn(ServiceTestConfiguration.quote());
 		Portfolio folio = service.getPortfolio(ServiceTestConfiguration.USER_ID);
 	}
 	@Test
@@ -69,7 +69,7 @@ public class PortfolioServiceTest {
 		
 		
 		//when(accountService.getUri()).thenReturn(uri);
-		when(restTemplate.postForEntity(eq("http://" + service.accountsService +"/accounts/transaction"), any(), eq(String.class))).thenReturn(response);
+		when(restTemplate.postForEntity(eq("//" + service.accountsService +"/accounts/transaction"), any(), eq(String.class))).thenReturn(response);
 		when(repo.save(ServiceTestConfiguration.order())).thenReturn(returnOrder);
 		Order order = service.addOrder(ServiceTestConfiguration.order());
 		assertEquals(order, returnOrder);
@@ -84,7 +84,7 @@ public class PortfolioServiceTest {
 		
 		
 		//when(accountService.getUri()).thenReturn(uri);
-		when(restTemplate.postForEntity(eq("http://" + service.accountsService +"/accounts/transaction"), any(), eq(String.class))).thenReturn(response);
+		when(restTemplate.postForEntity(eq("//" + service.accountsService +"/accounts/transaction"), any(), eq(String.class))).thenReturn(response);
 		when(repo.save(isA(Order.class))).thenReturn(returnOrder);
 		Order requestOrder = ServiceTestConfiguration.order();
 		requestOrder.setOrderFee(null);
@@ -100,7 +100,7 @@ public class PortfolioServiceTest {
 		
 		
 		//when(accountService.getUri()).thenReturn(uri);
-		when(restTemplate.postForEntity(eq("http://" + service.accountsService +"/accounts/transaction"), any(), eq(String.class ))).thenReturn(response);
+		when(restTemplate.postForEntity(eq("//" + service.accountsService +"/accounts/transaction"), any(), eq(String.class ))).thenReturn(response);
 		when(repo.save(ServiceTestConfiguration.sellOrder())).thenReturn(returnOrder);
 		Order order = service.addOrder(ServiceTestConfiguration.sellOrder());
 		assertEquals(order, returnOrder);

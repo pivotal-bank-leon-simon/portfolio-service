@@ -52,13 +52,13 @@ public class QuoteRemoteCallServiceTest {
 	@Test
 	@Ignore
 	public void doGetQuote() {
-		when(restTemplate.getForObject("http://" + quotesURI + "/quote/{symbol}", Quote.class, ServiceTestConfiguration.SYMBOL)).thenReturn(ServiceTestConfiguration.quote());
+		when(restTemplate.getForObject("//" + quotesURI + "/quote/{symbol}", Quote.class, ServiceTestConfiguration.SYMBOL)).thenReturn(ServiceTestConfiguration.quote());
 		Quote quote = service.getQuote(ServiceTestConfiguration.SYMBOL);
 		assertEquals(ServiceTestConfiguration.quote(),quote);
 	}
 	@Test
 	public void doGetQuoteFailure() {
-		when(restTemplate.getForObject("http://" + quotesURI + "/quote/{symbol}", Quote.class, ServiceTestConfiguration.SYMBOL)).thenThrow(new RuntimeException("Deliberately throwing an exception 1"));
+		when(restTemplate.getForObject("//" + quotesURI + "/quote/{symbol}", Quote.class, ServiceTestConfiguration.SYMBOL)).thenThrow(new RuntimeException("Deliberately throwing an exception 1"));
 		
 		Quote quote = service.getQuote(ServiceTestConfiguration.SYMBOL);
 		assertNotEquals(ServiceTestConfiguration.quote(),quote);

@@ -8,17 +8,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.ClientResponse;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.oauth2AuthorizedClient;
 
 /**
  * Manages a portfolio of holdings of stock/shares.
@@ -45,31 +52,28 @@ public class PortfolioService {
 	QuoteRemoteCallService quoteService;
 
 	@Autowired
-	@LoadBalanced
-	private RestTemplate restTemplate;
+	private WebClient webClient;
 
 	@Autowired
-	private PortfolioRepositoryService portfolioRepositoryService;
+	private OrderRepository orderRepository;
 
 	@Value("${pivotal.accountsService.name}")
 	protected String accountsService;
 
 	/**
 	 * Retrieves the portfolio for the given accountId.
-	 * 
-	 * @param userId
+	 *
 	 *            The account id to retrieve for.
 	 * @return The portfolio.
 	 */
-	public Portfolio getPortfolio(String userId) {
+	public Portfolio getPortfolio() {
 		/*
 		 * Retrieve all orders for accounts id and build portfolio. - for each
 		 * order create holding. - for each holding find current price.
 		 */
-		logger.debug("Getting portfolio for accountId: " + userId);
-		List<Order> orders = portfolioRepositoryService.getOrders(userId);
+		logger.debug("Getting portfolio for accountId: " );
+		List<Order> orders = orderRepository.getOrders();
 		Portfolio folio = new Portfolio();
-		folio.setUserName(userId);
 		return createPortfolio(folio, orders);
 	}
 
@@ -84,6 +88,7 @@ public class PortfolioService {
 	 */
 	private Portfolio createPortfolio(Portfolio portfolio, List<Order> orders) {
 		// TODO: change to forEach() and maybe in parallel?
+
 		Set<String> symbols = new HashSet<>();
 		Holding holding = null;
 		for (Order order : orders) {
@@ -135,7 +140,7 @@ public class PortfolioService {
 	 * @return the saved order.
 	 */
 	@Transactional
-	public Order addOrder(Order order) {
+	public Order addOrder(Order order, String bearerToken) {
 		logger.debug("Adding order: " + order);
 		if (order.getOrderFee() == null) {
 			order.setOrderFee(Order.DEFAULT_ORDER_FEE);
@@ -168,16 +173,21 @@ public class PortfolioService {
 			transaction.setType(TransactionType.CREDIT);
 			
 		}
-		
-		ResponseEntity<String> result = restTemplate.postForEntity("http://"
-				+ accountsService
-				+ "/accounts/transaction",
-				transaction, String.class);
-		
-		if (result.getStatusCode() == HttpStatus.OK) {
+
+		ClientResponse result = webClient
+				.post()
+				.uri("//"
+								+ accountsService
+								+ "/accounts/transaction")
+                .contentType(MediaType.APPLICATION_JSON)
+                .syncBody(transaction)
+				.header(HttpHeaders.AUTHORIZATION, "Bearer " + bearerToken)
+				.exchange()
+				.block();
+		if (result.statusCode() == HttpStatus.OK) {
 			logger.info(String
 					.format("Account funds updated successfully for account: %s and new funds are: %s",
-							order.getAccountId(), result.getBody()));
+							order.getAccountId(), result.bodyToMono(String.class).block()));
 			return repository.save(order);
 			
 		} else {
