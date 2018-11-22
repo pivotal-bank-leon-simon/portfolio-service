@@ -16,8 +16,8 @@ import org.springframework.data.repository.query.Param;
  */
 public interface OrderRepository extends CrudRepository<Order,Integer> {
 
-	@Query("from Order order by completionDate asc")
+	@Query("from Order where userid = ?#{principal.claims['user_id']} order by completionDate asc")
+	//@Query("from Order order by completionDate asc")
 	List<Order> getOrders();
-
 
 }
