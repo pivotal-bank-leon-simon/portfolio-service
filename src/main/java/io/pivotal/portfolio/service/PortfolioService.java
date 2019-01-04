@@ -1,5 +1,6 @@
 package io.pivotal.portfolio.service;
 
+import com.newrelic.api.agent.Trace;
 import io.pivotal.portfolio.domain.*;
 import io.pivotal.portfolio.repository.OrderRepository;
 import org.slf4j.Logger;
@@ -40,12 +41,6 @@ public class PortfolioService {
 			.getLogger(PortfolioService.class);
 
 	/**
-	 * The order repository to store Order objects.
-	 */
-	@Autowired
-	OrderRepository repository;
-
-	/**
 	 * The service than handles the calls to get quotes.
 	 */
 	@Autowired
@@ -66,6 +61,7 @@ public class PortfolioService {
 	 *            The account id to retrieve for.
 	 * @return The portfolio.
 	 */
+	@Trace(async = true)
 	public Portfolio getPortfolio() {
 		/*
 		 * Retrieve all orders for accounts id and build portfolio. - for each
@@ -86,6 +82,7 @@ public class PortfolioService {
 	 *            the list of orders.
 	 * @return the portfolio object
 	 */
+	@Trace(async = true)
 	private Portfolio createPortfolio(Portfolio portfolio, List<Order> orders) {
 		// TODO: change to forEach() and maybe in parallel?
 
@@ -140,6 +137,7 @@ public class PortfolioService {
 	 * @return the saved order.
 	 */
 	@Transactional
+	@Trace(async = true)
 	public Order addOrder(Order order, String bearerToken) {
 		logger.debug("Adding order: " + order);
 		if (order.getOrderFee() == null) {
@@ -188,7 +186,7 @@ public class PortfolioService {
 			logger.info(String
 					.format("Account funds updated successfully for account: %s and new funds are: %s",
 							order.getAccountId(), result.bodyToMono(String.class).block()));
-			return repository.save(order);
+			return orderRepository.save(order);
 			
 		} else {
 			// TODO: throw exception - not enough funds!

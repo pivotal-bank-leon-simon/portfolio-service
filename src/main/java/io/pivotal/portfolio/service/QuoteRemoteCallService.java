@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import com.newrelic.api.agent.Trace;
 import io.pivotal.portfolio.domain.Quote;
 
 import org.slf4j.Logger;
@@ -47,6 +48,7 @@ public class QuoteRemoteCallService {
 	 *            the symbol of the quote to fetch.
 	 * @return The quote
 	 */
+	@Trace(async = true)
 	@HystrixCommand(fallbackMethod = "getQuoteFallback")
 	public Quote getQuote(String symbol) {
 		logger.debug("Fetching quote: " + symbol);
@@ -56,7 +58,6 @@ public class QuoteRemoteCallService {
 				.retrieve()
 				.bodyToMono(Quote.class)
 				.block();
-		//Quote quote = restTemplate.getForObject("//" + quotesService + "/quote/{symbol}", Quote.class, symbol);
 		return quote;
 	}
 
@@ -84,6 +85,7 @@ public class QuoteRemoteCallService {
 	 * @param symbols comma separated list of symbols.
 	 * @return
 	 */
+	@Trace(async = true)
 	public List<Quote> getMultipleQuotes(String symbols) {
 		logger.debug("retrieving multiple quotes: " + symbols);
 		ParameterizedTypeReference<List<Quote>> typeRef = new ParameterizedTypeReference<List<Quote>>() {};
@@ -93,8 +95,6 @@ public class QuoteRemoteCallService {
 				.retrieve()
 				.bodyToMono(typeRef)
 				.block();
-		//Quote[] quotesArr = restTemplate.getForObject("//" + quotesService + "/v1/quotes?q={symbols}", Quote[].class, symbols);
-		//List<Quote> quotes = Arrays.asList(quotesArr);
 		logger.debug("Received quotes: {}",quotes);
 		return quotes;
 		
