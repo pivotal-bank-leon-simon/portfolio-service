@@ -5,7 +5,10 @@ import java.util.List;
 
 import io.pivotal.portfolio.domain.Order;
 
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
+
 /**
  * 
  * @author David Ferreira Pinto
@@ -13,5 +16,8 @@ import org.springframework.data.repository.CrudRepository;
  */
 public interface OrderRepository extends CrudRepository<Order,Integer> {
 
-	List<Order> findByUserId(String userId);
+	@Query("from Order where userid = ?#{principal.claims['user_id']} order by completionDate asc")
+	//@Query("from Order order by completionDate asc")
+	List<Order> getOrders();
+
 }

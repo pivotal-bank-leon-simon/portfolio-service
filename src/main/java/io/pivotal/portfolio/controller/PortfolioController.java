@@ -10,6 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,13 +46,13 @@ public class PortfolioController {
 
 	/**
 	 * Retrieves the portfolio for the given account.
-	 * @param userId the user to retrieve the portfolio for.
 	 * @return The portfolio with HTTP OK.
 	 */
-	@RequestMapping(value = "/portfolio/{id}", method = RequestMethod.GET)
-	public ResponseEntity<Portfolio> getPortfolio(@PathVariable("id") final String userId) {
-		logger.debug("PortfolioController: Retrieving portfolio with user id:" + userId);
-		Portfolio folio = service.getPortfolio(userId);
+	@PreAuthorize("hasAuthority('ROLE_PORTFOLIO')")
+	@RequestMapping(value = "/portfolio", method = RequestMethod.GET)
+	public ResponseEntity<Portfolio> getPortfolio() {
+		logger.debug("PortfolioController: Retrieving portfolio with user id:" );
+		Portfolio folio = service.getPortfolio();
 		logger.debug("PortfolioController: Retrieved portfolio:" + folio);
 		return new ResponseEntity<Portfolio>(folio, getNoCacheHeaders(), HttpStatus.OK);
 	}
@@ -59,18 +64,19 @@ public class PortfolioController {
 	}
 	/**
 	 * Adds an order to the portfolio of the given user.
-	 * 
-	 * @param userId the user to add the order to.
+	 *
 	 * @param order The order to add.
 	 * @return The order with HTTP CREATED or BAD REQUEST if it couldn't save.
 	 */
+	@PreAuthorize("hasAuthority('ROLE_TRADE')")
 	@RequestMapping(value = "/portfolio", method = RequestMethod.POST)
-	public ResponseEntity<Order> addOrder(@RequestBody final Order order) {
+	public ResponseEntity<Order> addOrder(@RequestBody final Order order,
+										  @AuthenticationPrincipal JwtAuthenticationToken token) {
 		logger.debug("Adding Order: " + order);
 		
 		//TODO: can do a test to ensure userId == order.getUserId();
-		
-		Order savedOrder = service.addOrder(order);
+		order.setUserId(token.getName());
+		Order savedOrder = service.addOrder(order, token.getToken().getTokenValue());
 
 		logger.debug("Order added: " + savedOrder);
 		if (savedOrder != null && savedOrder.getOrderId() != null) {

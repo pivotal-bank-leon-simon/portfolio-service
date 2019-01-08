@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import com.newrelic.api.agent.Trace;
 import io.pivotal.portfolio.domain.Quote;
 
 import org.slf4j.Logger;
@@ -13,10 +14,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.oauth2AuthorizedClient;
 
 /**
  * Retrieves quotes from the quote service. Uses hystrix to manage failure.
@@ -34,8 +39,7 @@ public class QuoteRemoteCallService {
 	private String quotesService;
 
 	@Autowired
-	@LoadBalanced
-	private RestTemplate restTemplate;
+	private WebClient webClient;
 
 	/**
 	 * Retrieve up to date quotes.
@@ -44,10 +48,16 @@ public class QuoteRemoteCallService {
 	 *            the symbol of the quote to fetch.
 	 * @return The quote
 	 */
+	@Trace(async = true)
 	@HystrixCommand(fallbackMethod = "getQuoteFallback")
 	public Quote getQuote(String symbol) {
 		logger.debug("Fetching quote: " + symbol);
-		Quote quote = restTemplate.getForObject("http://" + quotesService + "/quote/{symbol}", Quote.class, symbol);
+		Quote quote = webClient
+				.get()
+				.uri("//" + quotesService + "/quote/" + symbol)
+				.retrieve()
+				.bodyToMono(Quote.class)
+				.block();
 		return quote;
 	}
 
@@ -75,10 +85,16 @@ public class QuoteRemoteCallService {
 	 * @param symbols comma separated list of symbols.
 	 * @return
 	 */
+	@Trace(async = true)
 	public List<Quote> getMultipleQuotes(String symbols) {
 		logger.debug("retrieving multiple quotes: " + symbols);
-		Quote[] quotesArr = restTemplate.getForObject("http://" + quotesService + "/v1/quotes?q={symbols}", Quote[].class, symbols);
-		List<Quote> quotes = Arrays.asList(quotesArr);
+		ParameterizedTypeReference<List<Quote>> typeRef = new ParameterizedTypeReference<List<Quote>>() {};
+		List<Quote> quotes = webClient
+				.get()
+				.uri("//" + quotesService + "/v1/quotes?q=" + symbols)
+				.retrieve()
+				.bodyToMono(typeRef)
+				.block();
 		logger.debug("Received quotes: {}",quotes);
 		return quotes;
 		

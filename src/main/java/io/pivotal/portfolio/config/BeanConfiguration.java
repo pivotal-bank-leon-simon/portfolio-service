@@ -1,15 +1,22 @@
 package io.pivotal.portfolio.config;
 
-import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerExchangeFilterFunction;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
+import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class BeanConfiguration {
-	@LoadBalanced
+
+
     @Bean
-    public RestTemplate loadBalanced() {
-        return new RestTemplate();
+    public WebClient webClient(LoadBalancerExchangeFilterFunction eff) {
+        return WebClient.builder()
+                .filter(eff)
+                .build();
     }
+
 }

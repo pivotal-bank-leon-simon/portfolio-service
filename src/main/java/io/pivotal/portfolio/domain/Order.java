@@ -28,7 +28,7 @@ public class Order {
 	public static BigDecimal DEFAULT_ORDER_FEE = new BigDecimal(10.50);
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.TABLE)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "orderid")
 	private Integer orderId;
 	
@@ -46,6 +46,17 @@ public class Order {
 
 	@Column(name = "orderfee", precision = 14, scale = 2)
 	private BigDecimal orderFee;
+
+	public String getTag() {
+		return tag;
+	}
+
+	public void setTag(String tag) {
+		this.tag = tag;
+	}
+
+	@Column(name = "tag")
+	private String tag;
 
 	@Column(name = "completiondate")
 	@Temporal(TemporalType.TIMESTAMP)
