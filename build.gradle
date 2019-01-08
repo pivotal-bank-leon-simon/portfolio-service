@@ -53,14 +53,8 @@ jacocoTestReport {
     group = "Reporting"
     description = "Generate Jacoco coverage reports after running tests."
     reports {
-
         csv.enabled false
-
-        html {
-            enabled true
-            destination "${buildDir}/reports/jacoco"
-        }
-
+        html.destination file("${buildDir}/jacocoHtml")
         xml.enabled false
     }
 
@@ -129,4 +123,4 @@ processResources {
 jar { baseName = 'portfolio' }
 description = "Micro-service to manage portfolios"
 
-task wrapper(type: Wrapper) { gradleVersion = '4.6' }
+task wrapper(type: Wrapper) { gradleVersion = '5.1' }
