@@ -13,8 +13,8 @@ public class BeanConfiguration {
 
 
     @Bean
-    public WebClient webClient(LoadBalancerExchangeFilterFunction eff) {
-        return WebClient.builder()
+    public WebClient webClient(WebClient.Builder webClientBuilder, LoadBalancerExchangeFilterFunction eff) {
+        return  webClientBuilder
                 .filter(eff)
                 .build();
     }
