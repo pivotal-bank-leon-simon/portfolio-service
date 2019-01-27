@@ -4,8 +4,9 @@ applications:
   timeout: 180
   instances: 1
   memory: 1G
-  random-route: true
   path: libs/portfolio-service-${version}.jar
+  routes:
+    - route: porftolio.apps.internal
   services:
     - service-registry
     - circuit-breaker-dashboard
