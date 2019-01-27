@@ -117,7 +117,8 @@ dependencies {
 
 // process substitutions in yml files.
 processResources {
-    filesMatching("**/*.yml") { expand(project.properties) }
+    include "**/*.yml"
+    filesNotMatching("**/application.yml") { expand(project.properties) }
 }
 
 jar { baseName = 'portfolio' }
